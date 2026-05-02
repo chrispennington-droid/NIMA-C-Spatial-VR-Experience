@@ -71,12 +71,21 @@ H_PLATE_TOP         = 3.09
 PLATE_THICK         = 0.0762    # 3 in
 
 # Stair opening / import zone (in GRID units for X/Y; Z in meters)
+# Excel master list ZONE_STAIRS: X [-9, -5.3592089], Y [-1, 0.25], Z [0, 3.39].
+# (User-provided precise SVG points -0.0893314 / 0.12511772 are the opening
+# hole inside this broader zone; the Excel zone is authoritative.)
 STAIR_X_MIN = -9.0
 STAIR_X_MAX = -5.3592089
-STAIR_Y_MIN = -0.0893314
-STAIR_Y_MAX = 0.12511772
+STAIR_Y_MIN = -1.0
+STAIR_Y_MAX =  0.25
 STAIR_Z_BASE = 0.0
 STAIR_Z_TOP  = 3.39
+
+# Precise stair-opening hole inside the broader zone (kept as a debug overlay).
+STAIR_HOLE_X_MIN = -9.0
+STAIR_HOLE_X_MAX = -5.3592089
+STAIR_HOLE_Y_MIN = -0.0893314
+STAIR_HOLE_Y_MAX =  0.12511772
 
 # Spawn (in GRID units for X/Y; spawn is at floor level Z = 0)
 SPAWN_X = -10.6043320328266
@@ -104,6 +113,65 @@ OVERHEAD_DOOR_W_M = 1.5 * GRID_SIZE_M
 # Mezz loading gate (VERIFY before Phase 5)
 MEZZ_GATE_HEIGHT_M = 3.0 * FT_TO_M       # 0.9144 m
 MEZZ_GATE_WIDTH_M  = 37.21 * FT_TO_M     # ~ 11.34 m
+
+# -----------------------------------------------------------------------------
+# MASTER LIST DATA (sourced from
+# NIMA_Phase2_Master_Coordinate_Geometry_Confidence_List_Clean.xlsx)
+# -----------------------------------------------------------------------------
+# All X/Y values are in GRID UNITS unless suffixed _M.
+# Tuple format for bbox zones:
+#     (id, min_xg, max_xg, min_yg, max_yg, base_z_m, top_z_m, mat_key)
+
+MASTER_F1_ZONES = [
+    ("ZONE_LOBBY_CTX",        -14.3, -5.5, -5.0,  0.9, 0.0,        H_F1,        "MAT_Floor_TanCeramicTile"),
+    ("ZONE_CONNECTOR_PATH",   -14.2, -6.0, -2.4,  0.2, 0.0,        0.02,        "MAT_Debug_VERIFY_Transparent"),
+    ("ZONE_OFFICELAB_TRANS",   -6.3, -4.9, -5.4, -0.6, 0.0,        H_F1,        "MAT_Floor_TanCeramicTile"),
+    ("ZONE_HIGHBAY",           -4.7,  3.2, -6.6, 10.5, 0.0,        H_HIGHBAY,   "MAT_HighBay_ConcreteSlab"),
+    ("ZONE_GRND_RECYC",        -1.0,  2.2, -7.3, -5.5, 0.0,        H_F1,        "MAT_HighBay_SolidIndustrialWall"),
+]
+
+MASTER_F2_ZONES = [
+    ("ZONE_HIGHBAY_OVERLOOK",  -6.0, -4.2, -1.3,  1.1, H_F2_SLAB_BASE, H_F2_TOP,    "MAT_Floor_TanCeramicTile"),
+    ("ZONE_HIGHBAY_VOID",      -4.7,  3.2, -0.5, 10.5, H_F2_SLAB_BASE, H_HIGHBAY,   "MAT_Debug_VERIFY_Transparent"),
+    ("ZONE_MEZZ",              -7.1, -5.1, -5.6, -3.4, H_F2_SLAB_BASE, H_F2_TOP,    "MAT_Wall_WarmCreamPaint"),
+    ("ZONE_PALLET",            -1.0,  2.2, -7.3, -5.5, H_F2_SLAB_BASE, H_F2_TOP,    "MAT_HighBay_SolidIndustrialWall"),
+]
+
+# Excel-authoritative HighBay footprint and rotation extents.
+HIGHBAY_BBOX_GRID = (-4.7, 3.2, -6.6, 10.5)
+
+# Doors. (id, x_grid, y_grid, function, floor)
+# function in {WORKING, CLOSED_NONWORKING, OVERHEAD_CLOSED}.
+MASTER_DOORS = [
+    # F1
+    ("D_F1_A",       -11.0,  -0.2, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_B",       -10.9,  -1.1, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_WORK_A",   -5.5,  -1.0, "WORKING",           "F1"),
+    ("D_F1_C",        -5.9,  -3.5, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_D",        -6.1,  -4.6, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_OH_A",     -6.2,  -6.8, "OVERHEAD_CLOSED",   "F1"),
+    ("D_F1_OH_B",     -4.7,  -7.1, "OVERHEAD_CLOSED",   "F1"),
+    ("D_F1_OH_C",     -2.9,  -7.4, "OVERHEAD_CLOSED",   "F1"),
+    ("D_F1_E",        -1.4,  -7.4, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_F",        -0.5,  -5.6, "CLOSED_NONWORKING", "F1"),
+    ("D_F1_G",        -3.4,  10.1, "CLOSED_NONWORKING", "F1"),
+    # F2
+    ("D_F2_A",       -13.1,  -3.7, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_B",       -12.5,  -3.8, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_C",        -8.8,  -4.6, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_D",        -7.6,  -3.3, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_E",        -5.5,  -2.1, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_F",       -12.0,  -0.1, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_G",       -11.5,   0.0, "CLOSED_NONWORKING", "F2"),
+    ("D_F2_H",        -5.2,   0.9, "CLOSED_NONWORKING", "F2"),
+]
+
+# F1 door height = 2.13 m (84 in), starts at Z 0.
+# F2 door height = 2.13 m, starts at Z 3.09.
+# Overhead door height = 3.05 m, width = 1.5 grid placeholder, VERIFY.
+DOOR_HEIGHT_MAN_M       = 2.13
+DOOR_HEIGHT_OVERHEAD_M  = 3.05
+DOOR_WIDTH_MAN_M        = 0.91   # 36 in, single-leaf placeholder
 
 # Output paths (next to script)
 SCRIPT_DIR = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
@@ -512,35 +580,28 @@ def build_spawn(coll, materials):
     )
 
 
-def build_f1_zone_overlays(coll, materials):
-    """
-    Phase 0/1: zone overlays come from the Excel master list.
-    Until that list is wired in, we register named transparent zones using
-    the verified anchor coordinates the user has provided. Each zone is a
-    bbox transparent box at F1 height + a label. Mark unverified extents with
-    the VERIFY material so they read as 'do not trust me yet'.
-
-    Each entry: (name, min_xg, max_xg, min_yg, max_yg, base_z, top_z, mat_key)
-    """
-    verify = "MAT_Debug_VERIFY_Transparent"
-
-    # NOTE: extents below are placeholders chosen to roughly match the SVG plan
-    # bands. They are flagged VERIFY and meant to be replaced by Excel-driven
-    # bboxes. The HighBay overlay is produced separately in build_highbay_overlays.
-    f1_zones = [
-        # name,                          min_xg, max_xg, min_yg, max_yg, base_z, top_z,        mat_key
-        ("ZONE_F1_LOBBY_VERIFY",         -12,    -8,     -2,      2,      0.0,    H_F1,        verify),
-        ("ZONE_F1_RECEPTION_IMPORT_ONLY",-12,   -10,     -3,      0,      0.0,    H_F1,        verify),
-        ("ZONE_F1_CIRCULATION_VERIFY",   -8,     -4,     -2,      2,      0.0,    H_F1,        verify),
-        ("ZONE_F1_BACKOFHOUSE_VERIFY",    8,     14,     -8,      4,      0.0,    H_F1,        verify),
-    ]
-    for (name, x0, x1, y0, y1, z0, z1, mk) in f1_zones:
+def _build_zone_list(zone_rows, coll, materials, skip_names=()):
+    for (name, x0, x1, y0, y1, z0, z1, mk) in zone_rows:
+        if name in skip_names:
+            continue
         mn_x, _ = grid_to_m(x0, 0); mx_x, _ = grid_to_m(x1, 0)
-        _, mn_y    = grid_to_m(0, y0); _, mx_y    = grid_to_m(0, y1)
+        _, mn_y = grid_to_m(0, y0); _, mx_y = grid_to_m(0, y1)
         add_transparent_box_from_bbox(name, mn_x, mx_x, mn_y, mx_y, z0, z1,
                                       mat=materials[mk], coll=coll)
-        add_label(name + "_LBL", name, ((mn_x + mx_x) * 0.5, (mn_y + mx_y) * 0.5, z1 + 0.1),
+        add_label(name + "_LBL", name,
+                  ((mn_x + mx_x) * 0.5, (mn_y + mx_y) * 0.5, z1 + 0.1),
                   size=0.25, coll=coll)
+
+
+def build_f1_zone_overlays(coll, materials):
+    """
+    F1 zone overlays driven by the Excel master list (MASTER_F1_ZONES).
+    The HighBay zone is also rendered here as the authoritative footprint;
+    rotation overlays are produced separately by build_highbay_overlays.
+    """
+    # ZONE_GRND_RECYC is rendered as a cage in build_grnd_recyc_pallet_stack.
+    _build_zone_list(MASTER_F1_ZONES, coll, materials,
+                     skip_names={"ZONE_GRND_RECYC"})
 
 
 def build_highbay_overlays(coll, materials):
@@ -550,9 +611,8 @@ def build_highbay_overlays(coll, materials):
       - VERIFY_HighBay_Rotated_10deg_Overlay: same bbox, rotated 10deg about its center
       - HighBay angle break debug polyline from the 100/260 deg call-out
     """
-    # Bounding bbox in GRID units (verify - based on SVG band; refine from Excel).
-    hb_xg0, hb_xg1 = -10.0, 6.0
-    hb_yg0, hb_yg1 = -10.0, 2.0
+    # Bounding bbox from Excel master list ZONE_HIGHBAY.
+    hb_xg0, hb_xg1, hb_yg0, hb_yg1 = HIGHBAY_BBOX_GRID
     hb_x0, _ = grid_to_m(hb_xg0, 0); hb_x1, _ = grid_to_m(hb_xg1, 0)
     _, hb_y0 = grid_to_m(0, hb_yg0); _, hb_y1 = grid_to_m(0, hb_yg1)
 
@@ -601,9 +661,8 @@ def build_f2_slab_and_polygon(coll_slab, coll_door, materials):
     F2 overlook is built strictly from the 4 verified corner points - never as
     a bbox rectangle.
     """
-    # Provisional F2 slab bbox in GRID units.
-    f2_xg0, f2_xg1 = -10.0, 8.0
-    f2_yg0, f2_yg1 = -10.0, 6.0
+    # F2 slab bbox: union of F2 zones from the master list (excluding the void).
+    f2_xg0, f2_xg1, f2_yg0, f2_yg1 = -14.3, 3.2, -7.3, 10.5
     fx0, _ = grid_to_m(f2_xg0, 0); fx1, _ = grid_to_m(f2_xg1, 0)
     _, fy0 = grid_to_m(0, f2_yg0); _, fy1 = grid_to_m(0, f2_yg1)
     add_transparent_box_from_bbox(
@@ -627,8 +686,14 @@ def build_f2_slab_and_polygon(coll_slab, coll_door, materials):
         coll=coll_slab,
         outline_too=True,
     )
-    # Glass perimeter wall along the same 4-corner polygon
-    glass_h = H_F2_TOP - H_F2_SLAB_TOP   # 5.99 - 3.39 = 2.60 m
+    # F2 zones from master list. ZONE_PALLET is rendered as a stacked cage in
+    # build_grnd_recyc_pallet_stack. ZONE_HIGHBAY_VOID is also rendered in cutouts.
+    _build_zone_list(MASTER_F2_ZONES, coll_slab, materials,
+                     skip_names={"ZONE_PALLET", "ZONE_HIGHBAY_VOID"})
+
+    # Glass perimeter wall along the same 4-corner polygon.
+    # Excel ELEM_F2_GLASS_PERIMETER_WALL: Z 3.09 -> 4.19 (height 1.10 m, guard).
+    glass_h = 4.19 - H_F2_SLAB_BASE   # 1.10 m
     pts_m = [grid_to_m(xg, yg) for (xg, yg) in F2_OVERLOOK_POLYGON]
     n = len(pts_m)
     glass_verts = []
@@ -669,9 +734,9 @@ def build_cutouts_and_voids(coll, materials):
     Phase 0/1 cutouts are MARKER zones; we do not boolean them out of the slab.
     Naming reflects the eventual cut, but they are visually transparent for now.
     """
-    # CUTOUT_F2_HIGHBAY_VOID - large cutout above HighBay area (VERIFY extents).
-    hb_x0, _ = grid_to_m(-10, 0); hb_x1, _ = grid_to_m(2, 0)
-    _, hb_y0 = grid_to_m(0, -10); _, hb_y1 = grid_to_m(0, 2)
+    # CUTOUT_F2_HIGHBAY_VOID - extents from Excel ZONE_HIGHBAY_VOID.
+    hb_x0, _ = grid_to_m(-4.7, 0); hb_x1, _ = grid_to_m(3.2, 0)
+    _, hb_y0 = grid_to_m(0, -0.5); _, hb_y1 = grid_to_m(0, 10.5)
     add_transparent_box_from_bbox(
         "CUTOUT_F2_HIGHBAY_VOID",
         hb_x0, hb_x1, hb_y0, hb_y1,
@@ -679,7 +744,8 @@ def build_cutouts_and_voids(coll, materials):
         mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll,
     )
 
-    # CUTOUT_F2_STAIR_OPENING - cuts the F2 slab at the stair opening footprint.
+    # CUTOUT_F2_STAIR_OPENING - cuts the F2 slab at the stair opening footprint
+    # (broader Excel zone), and an inner precise hole overlay.
     sx0, _ = grid_to_m(STAIR_X_MIN, 0); sx1, _ = grid_to_m(STAIR_X_MAX, 0)
     _, sy0 = grid_to_m(0, STAIR_Y_MIN); _, sy1 = grid_to_m(0, STAIR_Y_MAX)
     add_transparent_box_from_bbox(
@@ -692,6 +758,14 @@ def build_cutouts_and_voids(coll, materials):
         f"Stair cutout 0.00 -> {STAIR_Z_TOP:.2f} m (11.12 ft)",
         ((sx0 + sx1) * 0.5, (sy0 + sy1) * 0.5, STAIR_Z_TOP + 0.1),
         size=0.25, coll=coll,
+    )
+    # Precise stair-opening hole (smaller, inside the broader zone).
+    hx0, _ = grid_to_m(STAIR_HOLE_X_MIN, 0); hx1, _ = grid_to_m(STAIR_HOLE_X_MAX, 0)
+    _, hy0 = grid_to_m(0, STAIR_HOLE_Y_MIN); _, hy1 = grid_to_m(0, STAIR_HOLE_Y_MAX)
+    add_rect_outline(
+        "CUTOUT_F2_STAIR_OPENING_PRECISE_HOLE",
+        hx0, hx1, hy0, hy1, H_F2_SLAB_TOP + 0.005,
+        mat=materials["MAT_Debug_HighBay_Rotated10"], coll=coll,
     )
 
     # CUTOUT_F2_LOBBY_OPEN_TO_BELOW_VERIFY (to-be-confirmed open-to-below over lobby)
@@ -743,9 +817,9 @@ def build_grnd_recyc_pallet_stack(coll, materials):
     a 3-inch step.
     Provisional XY footprint VERIFY.
     """
-    # Provisional bbox in GRID units (VERIFY).
-    gx0, gx1 = 4.0, 8.0
-    gy0, gy1 = -8.0, -4.0
+    # bbox from Excel master list ZONE_GRND_RECYC / ZONE_PALLET / ELEM_GRND_RECYC_CAGE.
+    gx0, gx1 = -1.0, 2.2
+    gy0, gy1 = -7.3, -5.5
     mx0, _ = grid_to_m(gx0, 0); mx1, _ = grid_to_m(gx1, 0)
     _, my0 = grid_to_m(0, gy0); _, my1 = grid_to_m(0, gy1)
 
@@ -788,24 +862,28 @@ def build_mezz_gate(coll, materials):
     Coords VERIFY before Phase 5; place along the south band of a provisional
     Mezz bbox. Width and height are exact per spec.
     """
-    # Provisional Mezz bbox (VERIFY)
-    mzx0, mzx1 = 0.0, 6.0
-    mzy0, mzy1 = -8.0, -4.0
+    # Mezz bbox from Excel ZONE_MEZZ.
+    mzx0, mzx1 = -7.1, -5.1
+    mzy0, mzy1 = -5.6, -3.4
     mx0, _ = grid_to_m(mzx0, 0); mx1, _ = grid_to_m(mzx1, 0)
     _, my0 = grid_to_m(0, mzy0); _, my1 = grid_to_m(0, mzy1)
 
-    cx = (mx0 + mx1) * 0.5
-    # Gate sits along the open NE-SE side; place along south edge as a stand-in.
+    # Gate runs along the open NE-SE side (east edge of Mezz, +X face).
+    # User-specified gate W = 11.34 m exceeds the bbox; do NOT shrink to fit.
+    # Anchor the gate centered on the east edge midpoint.
+    cy_mid = (my0 + my1) * 0.5
+    gx = mx1 + 0.05
     half_w = MEZZ_GATE_WIDTH_M * 0.5
+    gy_a = cy_mid - half_w
+    gy_b = cy_mid + half_w
     h = MEZZ_GATE_HEIGHT_M
-    gx_a = cx - half_w
-    gx_b = cx + half_w
-    gy = my0 - 0.05
+
+    # Build gate aligned along Y (east face, perpendicular to X).
     v = [
-        (gx_a, gy - 0.04, 0.0), (gx_b, gy - 0.04, 0.0),
-        (gx_b, gy + 0.04, 0.0), (gx_a, gy + 0.04, 0.0),
-        (gx_a, gy - 0.04, h),   (gx_b, gy - 0.04, h),
-        (gx_b, gy + 0.04, h),   (gx_a, gy + 0.04, h),
+        (gx - 0.04, gy_a, H_F2_SLAB_BASE), (gx + 0.04, gy_a, H_F2_SLAB_BASE),
+        (gx + 0.04, gy_b, H_F2_SLAB_BASE), (gx - 0.04, gy_b, H_F2_SLAB_BASE),
+        (gx - 0.04, gy_a, H_F2_SLAB_BASE + h), (gx + 0.04, gy_a, H_F2_SLAB_BASE + h),
+        (gx + 0.04, gy_b, H_F2_SLAB_BASE + h), (gx - 0.04, gy_b, H_F2_SLAB_BASE + h),
     ]
     f = [
         (0, 1, 2, 3), (4, 5, 6, 7),
@@ -819,43 +897,155 @@ def build_mezz_gate(coll, materials):
     add_label(
         "ELEM_MEZZ_LOADING_GATE_VERIFY_LBL",
         f"MEZZ GATE  W={MEZZ_GATE_WIDTH_M:.2f} m (37.21 ft)  "
-        f"H={MEZZ_GATE_HEIGHT_M:.2f} m (3 ft)  VERIFY",
-        (cx, gy - 0.6, h + 0.15),
+        f"H={MEZZ_GATE_HEIGHT_M:.4f} m (3 ft)  VERIFY (W exceeds Mezz bbox)",
+        (gx + 0.2, cy_mid, H_F2_SLAB_BASE + h + 0.15),
         size=0.28, coll=coll,
     )
 
 
+def _detect_pair_partners(doors, threshold_grid=1.2):
+    """
+    Tag potential double-door pairs: any two same-floor doors of compatible
+    function within `threshold_grid` of each other.
+    Returns dict[id] -> partner_id (only for doors that have a partner).
+    """
+    partners = {}
+    for i, (id_a, xa, ya, fn_a, fl_a) in enumerate(doors):
+        if id_a in partners:
+            continue
+        for (id_b, xb, yb, fn_b, fl_b) in doors[i + 1:]:
+            if id_b in partners or fl_a != fl_b or fn_a != fn_b:
+                continue
+            if math.hypot(xa - xb, ya - yb) <= threshold_grid:
+                partners[id_a] = id_b
+                partners[id_b] = id_a
+                break
+    return partners
+
+
 def build_door_window_glass_markers(coll, materials):
     """
-    Door / window / glass curtain / overhead-door markers.
+    Door / overhead-door / window / glass markers driven by the Excel master list.
 
-    *** PHASE 0/1 PLACEHOLDER LIST ***
-    These entries MUST be replaced/extended from the final Excel master list
-    plus the updated SVG color map (magenta=closed, yellow=working,
-    cyan=glass curtain, Trumatch 34-b=window, Trumatch 31-d=glass wall).
+    SVG color map:
+      magenta = closed/non-working door
+      yellow  = working door
+      cyan    = glass curtain wall
+      Trumatch 34-b = window
+      Trumatch 31-d = glass wall
 
-    All doors are treated as glass doors unless revised later.
-    Adjacent paired markers are tagged _PAIRA / _PAIRB for likely double doors.
+    All doors treated as glass doors unless revised later (per user spec).
+    Adjacent same-floor doors of compatible function are flagged as likely
+    double-door pairs in their object name suffix (_PAIRA/_PAIRB).
     """
-    placeholders = [
-        # (name,                                     xg,    yg,   marker_type,             rot_z, w_m,                h_m,  mat_key)
-        ("DOOR_WORKING_F1_LOBBY_NORTH_PAIRA",        -9.0,   2.0, "WORKING",                  0,  0.9,                 2.10, "MAT_Door_Working"),
-        ("DOOR_WORKING_F1_LOBBY_NORTH_PAIRB",        -8.1,   2.0, "WORKING",                  0,  0.9,                 2.10, "MAT_Door_Working"),
-        ("DOOR_CLOSED_F1_BOH_VERIFY",                 8.0,  -3.0, "CLOSED_NONWORKING",        0,  1.0,                 2.10, "MAT_Door_ClosedNonWorking"),
-        ("DOOR_CYAN_GLASS_CURTAIN_F1_VERIFY",        -7.0,  -2.0, "CYAN_GLASS",               0,  3.0,                 2.40, "MAT_DoorMarker_Cyan"),
-        ("WINDOW_TRUMATCH34B_F1_VERIFY",              4.0,   2.5, "WORKING",                  0,  2.4,                 1.50, "MAT_Window_Trumatch34b"),
-        ("GLASSWALL_TRUMATCH31D_F1_VERIFY",          -4.0,   2.5, "WORKING",                  0,  4.0,                 2.40, "MAT_GlassWall_Trumatch31d"),
-        ("OVERHEAD_DOOR_HIGHBAY_S_VERIFY",            0.0,  -10.0,"OVERHEAD_CLOSED",          0,  OVERHEAD_DOOR_W_M,   3.66, "MAT_Door_ClosedNonWorking"),
-        ("OVERHEAD_DOOR_HIGHBAY_E_VERIFY",            6.0,   -4.0,"OVERHEAD_CLOSED",         90,  OVERHEAD_DOOR_W_M,   3.66, "MAT_Door_ClosedNonWorking"),
-    ]
-    for (name, xg, yg, mtype, rotz, w, h, matk) in placeholders:
-        add_door_marker(
-            name, xg, yg, mtype,
-            mat=materials[matk], coll=coll,
-            width_m=w, depth_m=0.10, height_m=h, rotation_z_deg=rotz,
+    pair_map = _detect_pair_partners(MASTER_DOORS, threshold_grid=1.2)
+    pair_label_assigned = {}
+
+    for (door_id, xg, yg, fn, fl) in MASTER_DOORS:
+        if fn == "WORKING":
+            mat_key = "MAT_Door_Working"
+            h = DOOR_HEIGHT_MAN_M
+            w = DOOR_WIDTH_MAN_M
+        elif fn == "OVERHEAD_CLOSED":
+            mat_key = "MAT_Door_ClosedNonWorking"
+            h = DOOR_HEIGHT_OVERHEAD_M
+            w = OVERHEAD_DOOR_W_M
+        else:  # CLOSED_NONWORKING
+            mat_key = "MAT_Door_ClosedNonWorking"
+            h = DOOR_HEIGHT_MAN_M
+            w = DOOR_WIDTH_MAN_M
+
+        suffix = ""
+        if door_id in pair_map:
+            partner = pair_map[door_id]
+            if door_id < partner:
+                suffix = "_PAIRA"; pair_label_assigned[door_id] = "A"
+            else:
+                suffix = "_PAIRB"; pair_label_assigned[door_id] = "B"
+
+        name = door_id + suffix
+        obj = add_door_marker(
+            name, xg, yg, fn,
+            mat=materials[mat_key], coll=coll,
+            width_m=w, depth_m=0.10, height_m=h, rotation_z_deg=0.0,
         )
+        # Lift F2 doors onto the slab.
+        if fl == "F2":
+            obj.location.z = H_F2_SLAB_BASE
+
         x, y = grid_to_m(xg, yg)
-        add_label(name + "_LBL", name, (x, y + 0.2, h + 0.1), size=0.22, coll=coll)
+        z_lbl = (H_F2_SLAB_BASE if fl == "F2" else 0.0) + h + 0.1
+        tag = "  [DOUBLE-DOOR PAIR]" if door_id in pair_map else ""
+        add_label(
+            name + "_LBL", f"{door_id}{suffix}{tag}",
+            (x, y + 0.2, z_lbl), size=0.22, coll=coll,
+        )
+
+
+def build_additional_elements(coll, materials):
+    """
+    Additional elements from the Excel master list section
+    '05 New Standard Blockout Elements':
+      - ELEM_RAIL_HB_OVERLOOK
+      - ELEM_RAIL_STAIR_VOID (VERIFY)
+      - ELEM_OPEN_TO_BELOW_EDGE
+      - ELEM_ENTRY_GLASS_PROXY
+      - ELEM_OVERHEAD_VERIFY  (wide overhead-verify panel band)
+    """
+    # ELEM_RAIL_HB_OVERLOOK: -4.7..-4.2, -1.3..1.1, Z 3.09 -> 4.19 (h 1.10)
+    rx0, _ = grid_to_m(-4.7, 0); rx1, _ = grid_to_m(-4.2, 0)
+    _, ry0 = grid_to_m(0, -1.3); _, ry1 = grid_to_m(0, 1.1)
+    add_transparent_box_from_bbox(
+        "ELEM_RAIL_HB_OVERLOOK",
+        rx0, rx1, ry0, ry1, H_F2_SLAB_BASE, 4.19,
+        mat=materials["MAT_Glass_ClearArchitectural"], coll=coll,
+    )
+
+    # ELEM_RAIL_STAIR_VOID: -9..-7, -0.5..1, Z 3.09 -> 4.19 VERIFY
+    sx0, _ = grid_to_m(-9, 0); sx1, _ = grid_to_m(-7, 0)
+    _, sy0 = grid_to_m(0, -0.5); _, sy1 = grid_to_m(0, 1)
+    add_transparent_box_from_bbox(
+        "ELEM_RAIL_STAIR_VOID_VERIFY",
+        sx0, sx1, sy0, sy1, H_F2_SLAB_BASE, 4.19,
+        mat=materials["MAT_Guard_BlackPaintedMetal"], coll=coll,
+    )
+
+    # ELEM_OPEN_TO_BELOW_EDGE: -4.7..3.2, -0.5..10.5, Z 3.09 -> 3.14 (5 cm strip)
+    ex0, _ = grid_to_m(-4.7, 0); ex1, _ = grid_to_m(3.2, 0)
+    _, ey0 = grid_to_m(0, -0.5); _, ey1 = grid_to_m(0, 10.5)
+    add_rect_outline(
+        "ELEM_OPEN_TO_BELOW_EDGE",
+        ex0, ex1, ey0, ey1, 3.14,
+        mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll,
+    )
+
+    # ELEM_ENTRY_GLASS_PROXY: center -11, -2.5, height 2.4 m (working entry).
+    add_door_marker(
+        "ELEM_ENTRY_GLASS_PROXY",
+        -11.0, -2.5, "WORKING",
+        mat=materials["MAT_Glass_ClearArchitectural"], coll=coll,
+        width_m=2.0, depth_m=0.05, height_m=2.4, rotation_z_deg=0.0,
+    )
+    ex, ey = grid_to_m(-11.0, -2.5)
+    add_label(
+        "ELEM_ENTRY_GLASS_PROXY_LBL", "ENTRY GLASS PROXY (working)",
+        (ex, ey + 0.3, 2.5), size=0.25, coll=coll,
+    )
+
+    # ELEM_OVERHEAD_VERIFY: wide overhead band -6.5..-2.5, -7.8..-6.3, Z 0..3.05
+    ox0, _ = grid_to_m(-6.5, 0); ox1, _ = grid_to_m(-2.5, 0)
+    _, oy0 = grid_to_m(0, -7.8); _, oy1 = grid_to_m(0, -6.3)
+    add_transparent_box_from_bbox(
+        "ELEM_OVERHEAD_VERIFY",
+        ox0, ox1, oy0, oy1, 0.0, DOOR_HEIGHT_OVERHEAD_M,
+        mat=materials["MAT_Door_ClosedNonWorking"], coll=coll,
+    )
+    add_label(
+        "ELEM_OVERHEAD_VERIFY_LBL",
+        f"OVERHEAD VERIFY band  H={DOOR_HEIGHT_OVERHEAD_M:.2f} m  (closed)",
+        ((ox0 + ox1) * 0.5, oy0 - 0.4, DOOR_HEIGHT_OVERHEAD_M + 0.15),
+        size=0.28, coll=coll,
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -935,9 +1125,14 @@ def save_outputs():
 
 
 def print_validation_report():
+    f1_doors = sum(1 for d in MASTER_DOORS if d[4] == "F1" and d[3] != "OVERHEAD_CLOSED")
+    f2_doors = sum(1 for d in MASTER_DOORS if d[4] == "F2")
+    oh_doors = sum(1 for d in MASTER_DOORS if d[3] == "OVERHEAD_CLOSED")
+    working_doors = sum(1 for d in MASTER_DOORS if d[3] == "WORKING")
     lines = [
         "=" * 72,
         "NIMA Phase 0/1 Reference Blockout - VALIDATION REPORT",
+        "Source: NIMA_Phase2_Master_Coordinate_Geometry_Confidence_List_Clean.xlsx",
         "=" * 72,
         f"Grid scale:                1 grid = {GRID_SIZE_M:.4f} m (8 ft)",
         f"Spawn coordinate:          X = {SPAWN_X:.13f} g  Y = {SPAWN_Y:.7f} g  facing S",
@@ -957,6 +1152,11 @@ def print_validation_report():
         f"Overhead doors:            placeholder/VERIFY width 1.5 grid = {OVERHEAD_DOOR_W_M:.4f} m (12 ft)",
         f"Mezz gate:                 W={MEZZ_GATE_WIDTH_M:.2f} m H={MEZZ_GATE_HEIGHT_M:.4f} m  VERIFY before Phase 5",
         "High-bay rotation:         VERIFY (unrotated + 10 deg overlays present)",
+        "HighBay footprint:         X [-4.7, 3.2] g  Y [-6.6, 10.5] g (from Excel ZONE_HIGHBAY)",
+        f"Doors generated:           F1 man-doors={f1_doors}  F2 doors={f2_doors}  "
+        f"overhead={oh_doors}  working={working_doors}  total={len(MASTER_DOORS)}",
+        "Door positions:            sourced from Excel master list (Section 04)",
+        "Pair detection:            adjacent same-floor same-function doors flagged _PAIRA/_PAIRB",
         "Final walls/doors/stairs/reception/exterior: NOT generated",
         "=" * 72,
         "F2 OVERLOOK POLYGON (verified, grid units):",
@@ -995,6 +1195,7 @@ def main():
     build_grnd_recyc_pallet_stack(  colls["09_STACKING_AND_CAGE_MARKERS"], materials)
     build_mezz_gate(                colls["09_STACKING_AND_CAGE_MARKERS"], materials)
     build_stair_import_zone(        colls["10_IMPORT_ZONES"],          materials)
+    build_additional_elements(      colls["08_DOOR_WINDOW_GLASS_MARKERS"], materials)
     build_review_cameras(           colls["11_REVIEW_CAMERAS"])
 
     save_outputs()
