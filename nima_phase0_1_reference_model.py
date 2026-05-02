@@ -256,8 +256,11 @@ def _mk_mat(name, rgba, alpha=1.0, emit_strength=0.0):
         if emit_strength > 0 and "Emission Strength" in bsdf.inputs:
             bsdf.inputs["Emission Strength"].default_value = emit_strength
     if alpha < 1.0:
-        mat.blend_method = 'BLEND'
-        mat.shadow_method = 'NONE'
+        # Property names differ across Blender versions (4.2+ removed shadow_method).
+        if hasattr(mat, "blend_method"):
+            mat.blend_method = 'BLEND'
+        if hasattr(mat, "shadow_method"):
+            mat.shadow_method = 'NONE'
     return mat
 
 
