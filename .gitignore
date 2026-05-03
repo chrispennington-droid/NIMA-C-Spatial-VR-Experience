@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# Blender artifacts
+*.blend1
+*.blend2
+*.blend@
+*.fbx.bak
+
+# OS junk
+.DS_Store
+Thumbs.db
