@@ -20,9 +20,9 @@ Hard rules enforced by this script:
     - Blender units = meters, 1 unit = 1 m
     - 1 grid square = 8 ft = 2.4384 m
     - +X = East, +Y = North, +Z = Up
-    - No elevator
+    - No elevator (no elevator object, void, material, or label - anywhere)
     - No stair geometry (only an import zone)
-    - No reception desk geometry (import only)
+    - No reception (no reception zone, marker, label, or geometry - anywhere)
     - No exterior shell, no forklift / crane sim
     - No final walls / final doors yet
     - F2 overlook is a 4-point verified POLYGON, never a bbox rectangle
@@ -669,13 +669,14 @@ def build_f2_slab_and_polygon(coll_slab, coll_door, materials):
     fx0, _ = grid_to_m(f2_xg0, 0); fx1, _ = grid_to_m(f2_xg1, 0)
     _, fy0 = grid_to_m(0, f2_yg0); _, fy1 = grid_to_m(0, f2_yg1)
     add_transparent_box_from_bbox(
-        "ZONE_F2_SLAB_VERIFY",
+        "F2_SLAB_REFERENCE_ONLY_NOT_FINAL_GEOMETRY",
         fx0, fx1, fy0, fy1, H_F2_SLAB_BASE, H_F2_SLAB_TOP,
         mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll_slab,
     )
     add_label(
-        "ZONE_F2_SLAB_LBL",
-        f"F2 slab base {H_F2_SLAB_BASE:.2f} m / top {H_F2_SLAB_TOP:.2f} m  (thk {H_F2_SLAB_THICK:.2f} m)",
+        "F2_SLAB_REFERENCE_ONLY_NOT_FINAL_GEOMETRY_LBL",
+        f"F2_SLAB_REFERENCE_ONLY_NOT_FINAL_GEOMETRY  "
+        f"base {H_F2_SLAB_BASE:.2f} m / top {H_F2_SLAB_TOP:.2f} m  (thk {H_F2_SLAB_THICK:.2f} m)",
         (fx0 + 0.2, fy0 - 0.6, H_F2_SLAB_TOP + 0.05),
         size=0.30, coll=coll_slab,
     )
@@ -747,19 +748,20 @@ def build_cutouts_and_voids(coll, materials):
         mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll,
     )
 
-    # CUTOUT_F2_STAIR_OPENING - cuts the F2 slab at the stair opening footprint
-    # (broader Excel zone), and an inner precise hole overlay.
+    # CUTOUT_F2_STAIR_OPENING - SLAB CUTOUT MARKER at the stair opening footprint.
+    # Z spans only the F2 slab thickness (3.09 -> 3.39 m). The full-height
+    # ZONE_STAIR_OPENING_IMPORT_ONLY (0 -> 3.39 m) lives in 10_IMPORT_ZONES.
     sx0, _ = grid_to_m(STAIR_X_MIN, 0); sx1, _ = grid_to_m(STAIR_X_MAX, 0)
     _, sy0 = grid_to_m(0, STAIR_Y_MIN); _, sy1 = grid_to_m(0, STAIR_Y_MAX)
     add_transparent_box_from_bbox(
         "CUTOUT_F2_STAIR_OPENING",
-        sx0, sx1, sy0, sy1, STAIR_Z_BASE, STAIR_Z_TOP,
+        sx0, sx1, sy0, sy1, H_F2_SLAB_BASE, H_F2_SLAB_TOP,
         mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll,
     )
     add_label(
         "CUTOUT_F2_STAIR_OPENING_LBL",
-        f"Stair cutout 0.00 -> {STAIR_Z_TOP:.2f} m (11.12 ft)",
-        ((sx0 + sx1) * 0.5, (sy0 + sy1) * 0.5, STAIR_Z_TOP + 0.1),
+        f"Stair slab cutout {H_F2_SLAB_BASE:.2f} -> {H_F2_SLAB_TOP:.2f} m",
+        ((sx0 + sx1) * 0.5, (sy0 + sy1) * 0.5, H_F2_SLAB_TOP + 0.1),
         size=0.25, coll=coll,
     )
     # Precise stair-opening hole (smaller, inside the broader zone).
@@ -796,20 +798,6 @@ def build_stair_import_zone(coll, materials):
         size=0.30, coll=coll,
     )
 
-    # Reception import zone - marker only (no desk/casework geometry).
-    rx0, _ = grid_to_m(-12, 0); rx1, _ = grid_to_m(-10, 0)
-    _, ry0 = grid_to_m(0, -3);  _, ry1 = grid_to_m(0, 0)
-    add_transparent_box_from_bbox(
-        "ZONE_RECEPTION_IMPORT_ONLY",
-        rx0, rx1, ry0, ry1, 0.0, H_F1,
-        mat=materials["MAT_Debug_VERIFY_Transparent"], coll=coll,
-    )
-    add_label(
-        "ZONE_RECEPTION_IMPORT_ONLY_LBL",
-        "RECEPTION - IMPORT ONLY (no desk/casework)",
-        ((rx0 + rx1) * 0.5, (ry0 + ry1) * 0.5, H_F1 + 0.2),
-        size=0.28, coll=coll,
-    )
 
 
 def build_grnd_recyc_pallet_stack(coll, materials):
@@ -818,7 +806,7 @@ def build_grnd_recyc_pallet_stack(coll, materials):
     Storage stacked above the plate up to F2 ceiling reference.
     Plate top is FLUSH with F2 reference plane (Z = 3.09 m). Do NOT introduce
     a 3-inch step.
-    Provisional XY footprint VERIFY.
+    XY footprint locked to Excel master list (X -1.0..+2.2, Y -7.3..-5.5).
     """
     # bbox from Excel master list ZONE_GRND_RECYC / ZONE_PALLET / ELEM_GRND_RECYC_CAGE.
     gx0, gx1 = -1.0, 2.2
@@ -853,7 +841,7 @@ def build_grnd_recyc_pallet_stack(coll, materials):
 
     add_label(
         "STACK_GRND_RECYC_LBL",
-        "GRND/RECYC -> 3in plate (flush 3.09 m) -> Pallet Storage  (VERIFY xy)",
+        "GRND/RECYC -> 3in plate (flush 3.09 m) -> Pallet Storage",
         ((mx0 + mx1) * 0.5, my1 + 0.6, H_F1 + 0.1),
         size=0.28, coll=coll,
     )
@@ -862,8 +850,14 @@ def build_grnd_recyc_pallet_stack(coll, materials):
 def build_mezz_gate(coll, materials):
     """
     Mezz Storage open loading side - hinged metal safety gate marker.
-    Coords VERIFY before Phase 5; place along the south band of a provisional
-    Mezz bbox. Width and height are exact per spec.
+
+    *** VERIFY ***
+    Exact coordinates are NOT confirmed and must be verified before Phase 5.
+    Width and height are taken from the user spec (W = 11.34 m / 37.21 ft,
+    H = 0.9144 m / 3 ft). The Mezz bbox here is the Excel ZONE_MEZZ extents,
+    but the gate width exceeds those extents - do NOT shrink the gate to
+    force it into the older bbox. The placement on the east edge is a
+    diagnostic anchor, not a confirmed location.
     """
     # Mezz bbox from Excel ZONE_MEZZ.
     mzx0, mzx1 = -7.1, -5.1
@@ -990,7 +984,7 @@ def build_additional_elements(coll, materials):
     Additional elements from the Excel master list section
     '05 New Standard Blockout Elements':
       - ELEM_RAIL_HB_OVERLOOK
-      - ELEM_RAIL_STAIR_VOID (VERIFY)
+      - ELEM_STAIR_OPENING_GUARD_VERIFY
       - ELEM_OPEN_TO_BELOW_EDGE
       - ELEM_ENTRY_GLASS_PROXY
       - ELEM_OVERHEAD_VERIFY  (wide overhead-verify panel band)
@@ -1004,11 +998,11 @@ def build_additional_elements(coll, materials):
         mat=materials["MAT_Glass_ClearArchitectural"], coll=coll,
     )
 
-    # ELEM_RAIL_STAIR_VOID: -9..-7, -0.5..1, Z 3.09 -> 4.19 VERIFY
+    # ELEM_STAIR_OPENING_GUARD_VERIFY: -9..-7, -0.5..1, Z 3.09 -> 4.19 VERIFY
     sx0, _ = grid_to_m(-9, 0); sx1, _ = grid_to_m(-7, 0)
     _, sy0 = grid_to_m(0, -0.5); _, sy1 = grid_to_m(0, 1)
     add_transparent_box_from_bbox(
-        "ELEM_RAIL_STAIR_VOID_VERIFY",
+        "ELEM_STAIR_OPENING_GUARD_VERIFY",
         sx0, sx1, sy0, sy1, H_F2_SLAB_BASE, 4.19,
         mat=materials["MAT_Guard_BlackPaintedMetal"], coll=coll,
     )
@@ -1141,26 +1135,44 @@ def print_validation_report():
         f"Spawn coordinate:          X = {SPAWN_X:.13f} g  Y = {SPAWN_Y:.7f} g  facing S",
         f"Spawn coordinate (m):      X = {SPAWN_X * GRID_SIZE_M:+.4f} m  "
         f"Y = {SPAWN_Y * GRID_SIZE_M:+.4f} m",
-        "Elevator objects:          NONE (no elevator in this build)",
-        "Generated stair mesh:      NONE (stairs are import-only)",
-        "Reception desk geometry:   NONE (reception is import-only)",
-        "F2 overlook shape:         4 verified polygon points (NOT a bbox rectangle)",
+        "Elevator:                  NONE (no elevator object, void, material, or label)",
+        "Stair mesh:                NONE (no treads, risers, rails, or landings)",
+        "Reception:                 NONE (no reception zone, marker, label, or geometry)",
+        "Final walls / doors / stairs / reception / elevator / exterior /",
+        "  forklift / crane:        NONE (intentionally not generated in Phase 0/1)",
+        "-" * 72,
+        f"ZONE_HIGHBAY:              X [-4.7, +3.2] g  Y [-6.6, +10.5] g  Z [0, {H_HIGHBAY:.2f}] m",
+        f"CUTOUT_F2_HIGHBAY_VOID:    X [-4.7, +3.2] g  Y [-0.5, +10.5] g  "
+        f"Z [{H_F2_SLAB_BASE:.2f}, {H_F2_SLAB_TOP:.2f}] m  (slab cutout marker, not full-height solid)",
+        f"ZONE_GRND_RECYC:           X [-1.0, +2.2] g  Y [-7.3, -5.5] g  Z [0, {H_F1:.2f}] m",
+        f"ZONE_PALLET_STORAGE:       X [-1.0, +2.2] g  Y [-7.3, -5.5] g  "
+        f"Z [{H_PLATE_TOP:.2f}, {H_F2_TOP:.2f}] m",
+        f"ELEM_PALLET_FLOOR_PLATE:   X [-1.0, +2.2] g  Y [-7.3, -5.5] g  "
+        f"Z [{H_PLATE_BOTTOM:.4f}, {H_PLATE_TOP:.2f}] m  (plate top flush at F2 ref, no 3-inch step)",
+        "F2 overlook shape:         polygon from 4 verified corners only "
+        "(NOT bbox rectangle)",
+        "ELEM_F2_GLASS_PERIMETER_WALL: follows the same 4 verified corners",
         f"F2 slab reference:         base Z = {H_F2_SLAB_BASE:.2f} m, top Z = {H_F2_SLAB_TOP:.2f} m, "
-        f"thk {H_F2_SLAB_THICK:.2f} m",
-        f"Stair opening import zone: Z = {STAIR_Z_BASE:.2f} -> {STAIR_Z_TOP:.2f} m (11.12 ft)",
+        f"thk {H_F2_SLAB_THICK:.2f} m  (label: F2_SLAB_REFERENCE_ONLY_NOT_FINAL_GEOMETRY)",
+        f"ZONE_STAIR_OPENING_IMPORT_ONLY: X [{STAIR_X_MIN}, {STAIR_X_MAX}] g  "
+        f"Y [{STAIR_Y_MIN}, {STAIR_Y_MAX}] g  Z [{STAIR_Z_BASE:.2f}, {STAIR_Z_TOP:.2f}] m",
+        f"CUTOUT_F2_STAIR_OPENING:   X [{STAIR_X_MIN}, {STAIR_X_MAX}] g  "
+        f"Y [{STAIR_Y_MIN}, {STAIR_Y_MAX}] g  Z [{H_F2_SLAB_BASE:.2f}, {H_F2_SLAB_TOP:.2f}] m",
         f"High-bay height:           {H_HIGHBAY:.2f} m (33.81 ft)",
-        f"Roof reference:            {H_ROOF_REF:.2f} m (39.08 ft)  REFERENCE ONLY, not occupied",
-        f"GRND/RECYC + Pallet plate: Z {H_PLATE_BOTTOM:.4f} -> {H_PLATE_TOP:.2f} m  "
-        f"(top flush with F2 reference, no 3-inch step)",
-        f"Overhead doors:            placeholder/VERIFY width 1.5 grid = {OVERHEAD_DOOR_W_M:.4f} m (12 ft)",
-        f"Mezz gate:                 W={MEZZ_GATE_WIDTH_M:.2f} m H={MEZZ_GATE_HEIGHT_M:.4f} m  VERIFY before Phase 5",
+        f"Roof reference:            {H_ROOF_REF:.2f} m (39.08 ft) REFERENCE ONLY, not occupied",
+        f"Overhead doors:            placeholder/VERIFY width 1.5 grid = "
+        f"{OVERHEAD_DOOR_W_M:.4f} m (12 ft)",
+        f"ELEM_MEZZ_LOADING_GATE_VERIFY: W={MEZZ_GATE_WIDTH_M:.2f} m  "
+        f"H={MEZZ_GATE_HEIGHT_M:.4f} m  VERIFY (exact coordinates NOT confirmed)",
         "High-bay rotation:         VERIFY (unrotated + 10 deg overlays present)",
-        "HighBay footprint:         X [-4.7, 3.2] g  Y [-6.6, 10.5] g (from Excel ZONE_HIGHBAY)",
         f"Doors generated:           F1 man-doors={f1_doors}  F2 doors={f2_doors}  "
         f"overhead={oh_doors}  working={working_doors}  total={len(MASTER_DOORS)}",
         "Door positions:            sourced from Excel master list (Section 04)",
-        "Pair detection:            adjacent same-floor same-function doors flagged _PAIRA/_PAIRB",
-        "Final walls/doors/stairs/reception/exterior: NOT generated",
+        "Pair detection:            adjacent same-floor same-function doors "
+        "flagged _PAIRA/_PAIRB",
+        "ELEM_STAIR_OPENING_GUARD_VERIFY: present (renamed from ELEM_RAIL_STAIR_VOID_VERIFY)",
+        "Guard material:            MAT_Guard_BlackPaintedMetal "
+        "(no MAT_Handrail_BlackPaintedMetal references)",
         "=" * 72,
         "F2 OVERLOOK POLYGON (verified, grid units):",
     ]
